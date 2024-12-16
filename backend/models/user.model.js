@@ -41,7 +41,7 @@ const userSchema= new mongoose.Schema({
 timestamps:true
 }
 );
-const User=mongoose.model("User",userSchema)
+
 // Presave hook to hash password
 userSchema.pre("save",async function(next){
     if(!this.isModified("password")) return next();
@@ -63,4 +63,5 @@ userSchema.methods.comparePassword=async function (password) {
     }
     
 }
+const User=mongoose.model("User",userSchema)
 export default User;
