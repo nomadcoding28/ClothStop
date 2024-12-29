@@ -70,9 +70,47 @@ export const signup = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-    res.send("LogIn route called");
+    try {
+        const { email, password } = req.body;
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(401).send("User not found");
+        }
+        const isMatch = await user.comparePassword(password);
+        if (!isMatch) {
+            return res.status(401).send("Invalid credentials");
+        }
+        const { accessToken, refreshToken } = getToken(user);
+        await storeToken(user._id, refreshToken);
+        setCookies(res, accessToken, refreshToken);
+        res.status(200).json({
+            user: {
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role || "user" // Assuming a default role
+            },
+            message: "Login successful"
+        });
+        
+    } catch (error) {
+        console.error("Error logging in user:", error.message || error);
+        res.status(500).send("Error logging in");
+    }
 };
 
 export const logout = async (req, res) => {
-    res.send("LogOut route called");
+    try {
+        const refreshToken = req.cookies.refreshToken;
+        if (!refreshToken) {
+            const decode=jwt.verify(refreshToken,process.env.JWT_REFRESH_SECRET);
+            await client.del(`refreshToken:${decode.userId}`);
+        }
+        res.clearCookie("accessToken");
+        res.clearCookie("refreshToken");
+        res.json({message:"LogOut successful"});
+    } catch (error) {
+        res.status(500).send("Error logging out");
+    }
+    // res.send("LogOut route called");
 };
