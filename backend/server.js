@@ -30,14 +30,16 @@
 import express from "express";
 import dotenv from "dotenv";
 import authRoutes from "./routes/auth.route.js";
+import cookieParser from "cookie-parser";
 import { connectDB } from "./lib/db.js"; // Ensure this function establishes a proper DB connection
 
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware to parse JSON and URL-encoded data
+// Middleware to parse JSON , URL-encoded data and cookies from the request
 app.use(express.json());
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
 // Mount authentication routes
@@ -50,7 +52,7 @@ app.get("/api/auth/signup", (req, res) => {
 
 // Home Route
 app.get("/", (req, res) => {
-    res.send("Home route is working.");
+    res.send("Home route is working."); 
 });
 
 // Error Handling Middleware (for debugging)
