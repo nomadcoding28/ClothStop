@@ -102,7 +102,7 @@ export const login = async (req, res) => {
 export const logout = async (req, res) => {
     try {
         const refreshToken = req.cookies.refreshToken;
-        if (!refreshToken) {
+        if (refreshToken) {
             const decode=jwt.verify(refreshToken,process.env.JWT_REFRESH_SECRET);
             await client.del(`refreshToken:${decode.userId}`);
         }
@@ -113,4 +113,43 @@ export const logout = async (req, res) => {
         res.status(500).send("Error logging out");
     }
     // res.send("LogOut route called");
+};
+export const refreshToken = async (req, res) => {
+    try {
+        const refreshToken = req.cookies.refreshToken;
+
+        if (!refreshToken) {
+            return res.status(401).send("Unauthorized: No refresh token provided");
+        }
+
+        const decode = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+
+        const storedToken = await client.get(`refreshToken:${decode.userId}`);
+        if (storedToken !== refreshToken) {
+            return res.status(401).json({ message: "Invalid refresh token" });
+        }
+
+        const accessToken = jwt.sign({ userId: decode.userId }, process.env.JWT_SECRET, { expiresIn: "15m" });
+
+        res.cookie("accessToken", accessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 15 * 60 * 1000,
+        });
+
+        res.json({ accessToken });
+    } catch (error) {
+        console.error("Error refreshing token:", error.message || error);
+        res.status(500).json({ message: "Error refreshing token" });
+    }
+};
+
+export const getProfile= async(req,res)=>{
+    try{
+        res.json(req.user);   
+    }catch(error){
+        res.status(500).send("Error getting profile");
+    }
+    // res.send("working"); // for debugging
 };
