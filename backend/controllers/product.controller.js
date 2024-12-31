@@ -9,13 +9,26 @@ export const addProducts=async(req,res)=>{
         res.status(500).send("Error adding product");
     }
 }
+
+export const getFeaturedProducts=async(req,res)=>{
+    try{
+        const products=await Product.find({isFeatured:true});
+        if(!products){
+            res.status(404).json({message:"No featured products found"});
+        }
+        res.json({message:"Featured products fetched successfully",products});
+
+    }catch(error){
+        res.status(500).send("Error fetching featured products");
+    }
+}
 export const getAllProducts =async(req,res)=>{
     try { 
         const products = await Product.find();
         if(!products){
             return res.status(404).json({message:"No products found",});
         }
-        res.json({message:"Products fetched successfully"});
+        res.json({message:"Products fetched successfully",products});
     } catch (error) {
         res.status(500).send("Error fetching products");
     }
