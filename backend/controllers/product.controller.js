@@ -38,6 +38,17 @@ export const deleteProduct=async(req,res)=>{
         res.status(500).send("error in deleting product");
     }
 }
+export const getProductByCategory=async(req,res)=>{
+    try{
+        const product =await Product.find({category:req.params.category});
+        if(!product){
+            res.status(404).json({message:"No products found"});
+        }
+        res.json({message:"Product fetched successfully",product});
+    }catch(error){
+        res.status(500).send("Error fetching products");
+    }
+}
 export const getAllProducts =async(req,res)=>{
     try { 
         const products = await Product.find();
