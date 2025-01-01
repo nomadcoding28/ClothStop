@@ -22,6 +22,22 @@ export const getFeaturedProducts=async(req,res)=>{
         res.status(500).send("Error fetching featured products");
     }
 }
+export const deleteProduct=async(req,res)=>{
+    try {
+        // const product = await Product.findById(req.params.id);
+        // console.log("Product found:", product);
+
+        // console.log("ID received:", req.params.id);
+        const delproduct=await Product.findByIdAndDelete(req.params.id);
+        // console.log(delproduct);
+        if(!delproduct){
+            res.status(404).json({message:"Product not found"});
+        }
+        res.json({message:"Product deleted successfully"});
+    } catch (error) {
+        res.status(500).send("error in deleting product");
+    }
+}
 export const getAllProducts =async(req,res)=>{
     try { 
         const products = await Product.find();
